@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Knight Moves — Play Chess & Learn</title>
+<meta name="description" content="Play chess against a computer or a friend, practise with a chess quiz, and learn with Knight Moves.">
+<meta name="theme-color" content="#0c1311">
+<meta property="og:title" content="Knight Moves — Play Chess & Learn">
+<meta property="og:description" content="A quiet room for a good game. Play, practise and learn chess.">
+<meta property="og:type" content="website">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;700&family=Inter:wght@400;600&display=swap">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#0c1311;--g1:#1b3b33;--g2:#34264a;--fg:#efe8d8;--mut:#9aa89f;--glass:rgba(255,255,255,.055);--bd:rgba(255,255,255,.11);--gold:#e6c27a;--gold2:#b8893f}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#f3eee2;--g1:#cfe0d3;--g2:#e8d9bd;--fg:#1d2a25;--mut:#5d6b63;--glass:rgba(255,255,255,.6);--bd:rgba(40,50,40,.14);--gold:#8a5f1c;--gold2:#6b4a14}}
+:root[data-theme="light"]{--bg:#f3eee2;--g1:#cfe0d3;--g2:#e8d9bd;--fg:#1d2a25;--mut:#5d6b63;--glass:rgba(255,255,255,.6);--bd:rgba(40,50,40,.14);--gold:#8a5f1c;--gold2:#6b4a14}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;color:var(--fg);font:15px/1.6 Inter,system-ui,sans-serif;background:radial-gradient(900px 520px at 15% -5%,var(--g1),transparent 65%),radial-gradient(800px 520px at 100% 8%,var(--g2),transparent 60%),var(--bg);background-attachment:fixed}
+.wrap{max-width:620px;margin:0 auto;padding:0 16px 40px}
+h1,h2,h3{font-family:"Cormorant Garamond",Georgia,serif;font-weight:700;margin:0}
+.hero{text-align:center;padding:26px 0 14px}
+.hero .k{font-size:34px;color:var(--gold);filter:drop-shadow(0 3px 8px rgba(230,194,122,.35))}
+.hero h1{font-size:clamp(36px,10vw,52px);line-height:1;background:linear-gradient(180deg,var(--gold),var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.5px}
+.hero p{margin:6px 0 0;color:var(--mut);font-style:italic;font-family:"Cormorant Garamond",Georgia,serif;font-size:19px}
+.stage{--s:min(calc(100vw - 64px),520px);width:calc(var(--s) + 20px);margin:0 auto}
+.pl{display:flex;align-items:center;gap:10px;padding:8px 4px;min-height:48px}
+.av{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--glass);border:1px solid var(--bd);font-style:normal;font-size:20px;font-family:"Segoe UI Symbol","Apple Symbols",serif}
+.pl b{font-weight:600;font-size:14px}
+.cap{display:flex;flex-wrap:wrap;margin-left:auto;font-size:17px;line-height:1;font-family:"Segoe UI Symbol","Apple Symbols",serif}
+.cap span{margin-left:-3px}
+.cap .w{color:#fbf3df;-webkit-text-stroke:.6px #3b2a1a}.cap .k{color:#2a2733;-webkit-text-stroke:.6px #d9cfb8}
+.frame{padding:10px;border-radius:16px;background:linear-gradient(145deg,#7a5733,#3b2713 60%,#5a3f22);box-shadow:0 24px 50px -12px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.18),inset 0 -2px 6px rgba(0,0,0,.4)}
+.frame.end{box-shadow:0 0 0 2px var(--gold),0 0 40px rgba(230,194,122,.45),0 24px 50px -12px rgba(0,0,0,.55)}
+#board{position:relative;width:var(--s);height:var(--s);border-radius:4px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.5)}
+#sq{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);width:100%;height:100%}
+.s{position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.s.l{background:linear-gradient(135deg,#f3e6c8,#e2cda3)}
+.s.d{background:linear-gradient(135deg,#6b9779,#4f7761)}
+.s.lm::before{content:"";position:absolute;inset:0;background:rgba(246,208,84,.5)}
+.s.sl::before{content:"";position:absolute;inset:0;background:rgba(255,222,110,.78);box-shadow:inset 0 0 14px rgba(255,255,255,.5)}
+.s.ck::before{content:"";position:absolute;inset:0;background:radial-gradient(circle,#ff4d3d 0,rgba(255,77,61,.65) 40%,transparent 75%)}
+.s.mv::after{content:"";position:absolute;left:35%;top:35%;width:30%;height:30%;border-radius:50%;background:rgba(18,30,24,.3);transition:transform .15s}
+.s.mv.cp::after{left:6%;top:6%;width:88%;height:88%;background:transparent;border:5px solid rgba(18,30,24,.3)}
+.s i{position:absolute;font-style:normal;font-size:calc(var(--s)*.026);font-weight:600;opacity:.75;z-index:1;pointer-events:none}
+.s.l i{color:#4f7761}.s.d i{color:#f3e6c8}
+.s i.f{right:3px;bottom:1px}.s i.r{left:3px;top:1px}
+#pcs{position:absolute;inset:0;pointer-events:none}
+.pc{position:absolute;left:0;top:0;width:12.5%;height:12.5%;display:flex;align-items:center;justify-content:center;font-size:calc(var(--s)*.104);line-height:1;font-family:"Segoe UI Symbol","Noto Sans Symbols 2","Apple Symbols","DejaVu Sans",serif;transition:transform .3s cubic-bezier(.25,.9,.3,1),opacity .25s;filter:drop-shadow(0 3px 2px rgba(0,0,0,.45))}
+.pc.w{color:#fff8e6;-webkit-text-stroke:1.4px #3b2a1a}
+.pc.k{color:#1b1923;-webkit-text-stroke:1px rgba(255,240,210,.6)}
+.status{display:flex;align-items:center;justify-content:center;gap:8px;margin:12px 0 10px;padding:9px 14px;border-radius:999px;background:var(--glass);border:1px solid var(--bd);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);font-weight:600}
+.dot{width:12px;height:12px;border-radius:50%;border:1px solid rgba(0,0,0,.4)}
+.dot.w{background:#fff8e6}.dot.k{background:#1b1923;border-color:#cdbf9f}
+.ctl{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.btn{background:var(--glass);color:var(--fg);border:1px solid var(--bd);padding:9px 16px;border-radius:10px;font:600 14px Inter,sans-serif;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.btn.p{background:linear-gradient(180deg,var(--gold),var(--gold2));color:#1a1206;border-color:transparent}
+.btn.on{border-color:var(--gold);color:var(--gold)}
+.moves{margin-top:12px;padding:10px 14px;border-radius:12px;background:var(--glass);border:1px solid var(--bd);max-height:84px;overflow-y:auto;font-size:14px;color:var(--mut)}
+.moves b{color:var(--fg);font-weight:600}
+.cards{display:grid;gap:12px;margin-top:34px}
+.card{padding:16px 18px;border-radius:14px;background:var(--glass);border:1px solid var(--bd);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.card h3{font-size:22px;color:var(--gold)}
+.card p{margin:4px 0 0;color:var(--mut)}
+footer{text-align:center;color:var(--mut);font-size:13px;margin-top:30px}
+.nav{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:4px 0 18px}
+.nav a{padding:7px 14px;border-radius:999px;border:1px solid var(--bd);background:var(--glass);color:var(--mut);text-decoration:none;font-weight:600;font-size:13px}
+.nav a.on{color:#1a1206;background:linear-gradient(180deg,var(--gold),var(--gold2));border-color:transparent}
+.view[hidden]{display:none}
+.intro{text-align:center;padding:8px 0 4px}.intro h2{font-size:30px}.intro p{color:var(--mut);margin:4px 0 14px}
+.sec{font-size:26px;color:var(--gold);margin:32px 0 12px;text-align:center}
+.tiles,.menu{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile,.mc,.panel,.q{background:var(--glass);border:1px solid var(--bd);border-radius:14px;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.tile{padding:14px;text-align:center}.tile b,.mc b{display:block;font-size:32px;font-weight:400;color:var(--gold);font-family:"Segoe UI Symbol","Apple Symbols",serif}
+.tile h3{font-size:19px}.tile p,.mc p{margin:2px 0 0;color:var(--mut);font-size:13px;line-height:1.4}
+.qs{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px 2px 12px}
+.q{flex:0 0 84%;scroll-snap-align:center;padding:18px;text-align:center}
+.med{display:grid;place-items:center;width:62px;height:62px;margin:0 auto 10px;border-radius:50%;font:700 22px "Cormorant Garamond",Georgia,serif;font-style:normal;color:#1a1206;background:conic-gradient(from 200deg,var(--gold),#fff3d0,var(--gold2),var(--gold));box-shadow:0 0 0 3px var(--bd),0 8px 18px rgba(0,0,0,.35)}
+.q p{font:italic 500 20px/1.35 "Cormorant Garamond",Georgia,serif;margin:0 0 10px}
+.q b{display:block}.q span{color:var(--mut);font-size:13px}
+.mc{display:block;padding:18px 14px;text-align:center;color:var(--fg);text-decoration:none;transition:transform .2s,border-color .2s}
+.mc:active,.mc:hover{transform:translateY(-3px);border-color:var(--gold)}
+.mc h3{font-size:22px}
+.panel{padding:18px}.panel h2{font-size:28px;color:var(--gold);margin-bottom:10px}
+.mut{color:var(--mut)}.big{font:700 52px "Cormorant Garamond",serif;margin:0;color:var(--gold)}.qq{font-size:18px;font-weight:600;margin:4px 0 12px}
+.opt{display:block;width:100%;text-align:left;margin-bottom:8px}
+.opt.ok{border-color:#4caf7a;background:rgba(76,175,122,.25)}.opt.no{border-color:#e5604d;background:rgba(229,96,77,.25)}
+#chat{height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.msg{padding:9px 13px;border-radius:14px;max-width:86%;white-space:pre-wrap}
+.msg.me{align-self:flex-end;background:linear-gradient(180deg,var(--gold),var(--gold2));color:#1a1206}.msg.ai{align-self:flex-start;background:var(--glass);border:1px solid var(--bd)}
+.row{display:flex;gap:8px}.row input{flex:1;min-width:0;padding:10px 12px;border-radius:10px;border:1px solid var(--bd);background:var(--glass);color:var(--fg);font:15px Inter,sans-serif}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+details{border-bottom:1px solid var(--bd);padding:10px 0}summary{cursor:pointer;font-weight:600}details p{margin:6px 0 0;color:var(--mut)}
+
+/* Extra polish: touch-friendly controls, clock, theme toggle, and small-screen layout */
+button,a,input{touch-action:manipulation}
+button:focus-visible,a:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.hero-tools{display:flex;justify-content:flex-end;margin:0 0 4px}
+.clock{margin-left:auto;min-width:68px;text-align:center;padding:5px 9px;border-radius:8px;background:rgba(0,0,0,.22);border:1px solid var(--bd);font-variant-numeric:tabular-nums;font-weight:700;font-size:14px}
+.clock.active{background:var(--gold);color:#1a1206;border-color:transparent}
+.extra-ctl{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.small-note{font-size:12px;color:var(--mut);text-align:center;margin:8px 0 0}
+@media(max-width:420px){.wrap{padding-left:10px;padding-right:10px}.hero{padding-top:18px}.nav{gap:5px}.nav a{padding:7px 10px;font-size:12px}.stage{--s:min(calc(100vw - 44px),520px);width:calc(var(--s) + 12px)}.frame{padding:6px;border-radius:12px}.btn{padding:10px 12px}.tiles,.menu{gap:8px}.tile,.mc{padding:12px 9px}.panel{padding:14px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="hero-tools"><button class="btn" id="themeToggle" type="button" aria-label="Switch colour theme">☼ Light mode</button></div>
+<div class="hero"><div class="k">♞︎</div><h1>Knight Moves</h1><p>A quiet room for a good game.</p></div>
+
+<nav class="nav" id="nav"><a href="#home">Home</a><a href="#play">Play</a><a href="#quiz">Quiz</a><a href="#coach">AI Coach</a><a href="#help">Help</a></nav>
+
+<section class="view" id="v-home">
+<div class="intro"><h2>Welcome to the board</h2><p>Play, practise and learn chess in one calm, beautiful place.</p><a class="btn p" href="#play" style="text-decoration:none;display:inline-block">Play now</a> <button class="btn" id="shareSite" type="button">Share site</button></div>
+<h2 class="sec">What we’ve built</h2>
+<div class="tiles">
+<div class="tile"><b>&#9819;&#xFE0E;</b><h3>Full rules</h3><p>Castling, en passant and promotion.</p></div>
+<div class="tile"><b>&#9822;&#xFE0E;</b><h3>Computer opponent</h3><p>Or share one phone with a friend.</p></div>
+<div class="tile"><b>&#9820;&#xFE0E;</b><h3>Chess quiz</h3><p>Test what you know, question by question.</p></div>
+<div class="tile"><b>&#9821;&#xFE0E;</b><h3>AI coach</h3><p>Ask anything about the game.</p></div>
+</div>
+<h2 class="sec">Words from the masters</h2>
+<div class="qs">
+<div class="q"><i class="med">RF</i><p>“Chess is war over the board.”</p><b>Bobby Fischer</b><span>World Champion, 1972–1975</span></div>
+<div class="q"><i class="med">GK</i><p>“Chess is mental torture.”</p><b>Garry Kasparov</b><span>World Champion, 1985–2000</span></div>
+<div class="q"><i class="med">JC</i><p>“You may learn much more from a game you lose than from a game you win.”</p><b>José Raúl Capablanca</b><span>World Champion, 1921–1927</span></div>
+<div class="q"><i class="med">MT</i><p>“There are two kinds of sacrifices: correct ones, and mine.”</p><b>Mikhail Tal</b><span>World Champion, 1960–1961</span></div>
+<div class="q"><i class="med">EL</i><p>“When you see a good move, look for a better one.”</p><b>Emanuel Lasker</b><span>World Champion, 1894–1921</span></div>
+</div>
+<h2 class="sec">Choose your path</h2>
+<div class="menu">
+<a class="mc" href="#play"><b>&#9822;&#xFE0E;</b><h3>Play chess</h3><p>Take a seat at the board.</p></a>
+<a class="mc" href="#quiz"><b>&#9820;&#xFE0E;</b><h3>Quiz</h3><p>Six questions, one rank.</p></a>
+<a class="mc" href="#coach"><b>&#9819;&#xFE0E;</b><h3>AI coach</h3><p>Ask, learn, improve.</p></a>
+<a class="mc" href="#help"><b>&#9821;&#xFE0E;</b><h3>Help</h3><p>Rules and how-tos.</p></a>
+</div>
+</section>
+
+<section class="view" id="v-play" hidden>
+<div class="stage">
+<div class="pl" id="pt"></div>
+<div class="frame" id="fr"><div id="board"><div id="sq"></div><div id="pcs"></div></div></div>
+<div class="pl" id="pb"></div>
+<div class="status"><span class="dot" id="dot"></span><span id="st"></span></div>
+<div class="ctl">
+<button class="btn on" id="m1">vs Computer</button><button class="btn" id="m2">2 Players</button>
+</div>
+<div class="ctl">
+<button class="btn p" id="nw">New game</button><button class="btn" id="un">Undo</button><button class="btn" id="fp">Flip</button><button class="btn on" id="sn">Sound</button>
+</div>
+<div class="extra-ctl"><button class="btn" id="clockToggle" type="button">10-minute clock: On</button><button class="btn" id="exportPgn" type="button">Download game moves</button></div>
+<p class="small-note">The clock starts when the first move is made. Download your move list to review later.</p>
+<div class="moves" id="ml">Your move list will appear here.</div>
+</div>
+
+<div class="cards">
+<div class="card"><h3>Open with purpose</h3><p>Claim the centre, bring out your knights and bishops, and castle early to tuck your king away.</p></div>
+<div class="card"><h3>Look before you leap</h3><p>Before every move, ask what your opponent’s last move is threatening.</p></div>
+<div class="card"><h3>Trade with intent</h3><p>Pawn 1, knight and bishop 3, rook 5, queen 9. Trade when it favours you.</p></div>
+</div>
+</section>
+
+<section class="view" id="v-quiz" hidden><div class="panel"><h2>Chess quiz</h2><div id="qz"></div></div></section>
+
+<section class="view" id="v-coach" hidden><div class="panel"><h2>AI coach</h2>
+<div id="chat"></div>
+<div class="chips"><button class="btn" data-q="How should I open a game as a beginner?">Opening tips</button><button class="btn" data-q="Explain castling simply.">Castling</button><button class="btn" data-q="How do I avoid blundering my pieces?">Avoid blunders</button></div>
+<div class="row"><input id="ci" placeholder="Ask about chess…" autocomplete="off"><button class="btn p" id="cs">Send</button></div></div></section>
+
+<section class="view" id="v-help" hidden><div class="panel"><h2>Help</h2>
+<details><summary>How do I move a piece?</summary><p>Tap a piece, then tap a highlighted square. Dots show legal moves; rings show captures.</p></details>
+<details><summary>How do special moves work?</summary><p>Castle by moving your king two squares toward a rook. Capture en passant by moving a pawn diagonally behind one that just advanced two squares. Pawns reaching the last rank become queens.</p></details>
+<details><summary>Computer or two players?</summary><p>Choose “vs Computer” to play Black against the engine, or “2 Players” to pass one device back and forth.</p></details>
+<details><summary>What do Undo, Flip and Sound do?</summary><p>Undo takes back your last move, Flip turns the board around, and Sound toggles the move clicks.</p></details>
+<details><summary>How are games won or drawn?</summary><p>Checkmate wins. Stalemate, when the player to move has no legal move but isn’t in check, is a draw.</p></details>
+</div></section>
+
+<footer>Castling, en passant and promotion are all supported.</footer>
+</div>
+
+<script>
+var V="\uFE0E",GL={k:"♚",q:"♛",r:"♜",b:"♝",n:"♞",p:"♟"},VAL={p:100,n:320,b:330,r:500,q:900,k:0};
+var S,el,sqE,last,hist,moves,sel,over,caps,ml,busy,fl=false,ai=true,snOn=true,z=1,AC;
+var clockOn=true, clockLeft={w:600,b:600}, clockStarted=false, clockTimer=null, lastClockTick=Date.now();
+function col(p){return p===p.toUpperCase()?"w":"b"}
+function att(bd,r,c,by){
+var w=by==="w",g=function(y,x){return y>=0&&y<8&&x>=0&&x<8?bd[y][x]:""},dr=w?1:-1;
+var P=w?"P":"p",N=w?"N":"n",K=w?"K":"k",B=w?"B":"b",R=w?"R":"r",Q=w?"Q":"q";
+if(g(r+dr,c-1)===P||g(r+dr,c+1)===P)return true;
+var kn=[[1,2],[2,1],[-1,2],[-2,1],[1,-2],[2,-1],[-1,-2],[-2,-1]];
+for(var i=0;i<8;i++)if(g(r+kn[i][0],c+kn[i][1])===N)return true;
+for(var a=-1;a<2;a++)for(var e=-1;e<2;e++){if(!a&&!e)continue;
+if(g(r+a,c+e)===K)return true;
+var y=r+a,x=c+e;while(y>=0&&y<8&&x>=0&&x<8){var q=bd[y][x];if(q){if(q===Q||q===(a&&e?B:R))return true;break}y+=a;x+=e}}
+return false}
+function inCheck(bd,me){var k=me==="w"?"K":"k";for(var r=0;r<8;r++)for(var c=0;c<8;c++)if(bd[r][c]===k)return att(bd,r,c,me==="w"?"b":"w");return false}
+function gen(s,r,c){
+var bd=s.b,p=bd[r][c],t=p.toLowerCase(),me=col(p),o=[],opp=me==="w"?"b":"w";
+function add(y,x){if(y<0||y>7||x<0||x>7)return false;var q=bd[y][x];if(!q){o.push([y,x]);return true}if(col(q)!==me)o.push([y,x]);return false}
+if(t==="p"){var d=me==="w"?-1:1,st=me==="w"?6:1;
+if(!bd[r+d][c]){o.push([r+d,c]);if(r===st&&!bd[r+2*d][c])o.push([r+2*d,c])}
+[-1,1].forEach(function(dc){var x=c+dc;if(x<0||x>7)return;var q=bd[r+d][x];if(q&&col(q)!==me)o.push([r+d,x]);else if(s.ep&&s.ep[0]===r+d&&s.ep[1]===x)o.push([r+d,x,"e"])})}
+else if(t==="n"){[[1,2],[2,1],[-1,2],[-2,1],[1,-2],[2,-1],[-1,-2],[-2,-1]].forEach(function(m){add(r+m[0],c+m[1])})}
+else if(t==="k"){for(var a=-1;a<2;a++)for(var e=-1;e<2;e++)if(a||e)add(r+a,c+e);
+var hr=me==="w"?7:0;
+if(r===hr&&c===4&&!att(bd,r,4,opp)){
+if(s.cr[me==="w"?"K":"k"]&&!bd[r][5]&&!bd[r][6]&&bd[r][7]===(me==="w"?"R":"r")&&!att(bd,r,5,opp)&&!att(bd,r,6,opp))o.push([r,6,"k"]);
+if(s.cr[me==="w"?"Q":"q"]&&!bd[r][1]&&!bd[r][2]&&!bd[r][3]&&bd[r][0]===(me==="w"?"R":"r")&&!att(bd,r,3,opp)&&!att(bd,r,2,opp))o.push([r,2,"q"])}}
+else{var D=[];if(t!=="b")D.push([1,0],[-1,0],[0,1],[0,-1]);if(t!=="r")D.push([1,1],[1,-1],[-1,1],[-1,-1]);
+D.forEach(function(m){var y=r+m[0],x=c+m[1];while(add(y,x)){y+=m[0];x+=m[1]}})}
+return o}
+function mk(s,fr,fc,m){
+var n={b:s.b.map(function(x){return x.slice()}),cr:{K:s.cr.K,Q:s.cr.Q,k:s.cr.k,q:s.cr.q},ep:null,turn:s.turn==="w"?"b":"w"};
+var p=n.b[fr][fc],tr=m[0],tc=m[1],f=m[2],cap=n.b[tr][tc];
+n.b[tr][tc]=p;n.b[fr][fc]="";
+if(f==="e"){cap=n.b[fr][tc];n.b[fr][tc]=""}
+if(f==="k"){n.b[tr][5]=n.b[tr][7];n.b[tr][7]=""}
+if(f==="q"){n.b[tr][3]=n.b[tr][0];n.b[tr][0]=""}
+if(p==="P"&&tr===0)n.b[tr][tc]="Q";if(p==="p"&&tr===7)n.b[tr][tc]="q";
+if((p==="P"||p==="p")&&Math.abs(tr-fr)===2)n.ep=[(tr+fr)/2,tc];
+if(p==="K"){n.cr.K=0;n.cr.Q=0}if(p==="k"){n.cr.k=0;n.cr.q=0}
+[[fr,fc],[tr,tc]].forEach(function(q){if(q[0]===7&&q[1]===0)n.cr.Q=0;if(q[0]===7&&q[1]===7)n.cr.K=0;if(q[0]===0&&q[1]===0)n.cr.q=0;if(q[0]===0&&q[1]===7)n.cr.k=0});
+n.cap=cap;return n}
+function lg(s,r,c){var me=col(s.b[r][c]);return gen(s,r,c).filter(function(m){return !inCheck(mk(s,r,c,m).b,me)})}
+function all(s){var o=[];for(var r=0;r<8;r++)for(var c=0;c<8;c++){var p=s.b[r][c];if(p&&col(p)===s.turn)lg(s,r,c).forEach(function(m){o.push({r:r,c:c,m:m})})}return o}
+function ev(bd){var t=0;for(var r=0;r<8;r++)for(var c=0;c<8;c++){var p=bd[r][c];if(!p)continue;var l=p.toLowerCase(),w=col(p)==="w",x=VAL[l];
+if(l!=="k")x+=(7-Math.abs(c-3.5)-Math.abs(r-3.5))*4;if(l==="p")x+=(w?7-r:r)*4;
+t+=w?x:-x}return t}
+function search(s,d,a,b){
+if(!d)return ev(s.b);
+var ms=all(s);if(!ms.length)return inCheck(s.b,s.turn)?(s.turn==="w"?-99999-d:99999+d):0;
+var w=s.turn==="w",best=w?-1e9:1e9;
+for(var i=0;i<ms.length;i++){var v=search(mk(s,ms[i].r,ms[i].c,ms[i].m),d-1,a,b);
+if(w){if(v>best)best=v;if(best>a)a=best}else{if(v<best)best=v;if(best<b)b=best}if(b<=a)break}
+return best}
+function snd(f){if(!snOn)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();var o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime;o.type="triangle";o.frequency.value=f;g.gain.setValueAtTime(.14,t);g.gain.exponentialRampToValueAtTime(.001,t+.13);o.connect(g);g.connect(AC.destination);o.start();o.stop(t+.13)}catch(e){}}
+function pos(r,c){return fl?[7-r,7-c]:[r,c]}
+function place(e,r,c){var d=pos(r,c);e.style.transform="translate("+d[1]*100+"%,"+d[0]*100+"%)"}
+function mkPc(p,r,c){var e=document.createElement("div");e.className="pc "+(col(p)==="w"?"w":"k");e.textContent=GL[p.toLowerCase()]+V;place(e,r,c);document.getElementById("pcs").appendChild(e);return e}
+function buildSq(){var h=document.getElementById("sq");h.innerHTML="";sqE=[];for(var i=0;i<8;i++)sqE.push([]);
+for(var dr=0;dr<8;dr++)for(var dc=0;dc<8;dc++){var r=fl?7-dr:dr,c=fl?7-dc:dc,d=document.createElement("div");d.dataset.r=r;d.dataset.c=c;
+if(dr===7)d.innerHTML+='<i class="f">'+"abcdefgh"[c]+"</i>";if(dc===0)d.innerHTML+='<i class="r">'+(8-r)+"</i>";sqE[r][c]=d;h.appendChild(d)}}
+function rebuild(){buildSq();var h=document.getElementById("pcs");h.innerHTML="";el=[];for(var r=0;r<8;r++){el.push([]);for(var c=0;c<8;c++){var p=S.b[r][c];el[r].push(p?mkPc(p,r,c):null)}}}
+function init(){var rows=["rnbqkbnr","pppppppp",0,0,0,0,"PPPPPPPP","RNBQKBNR"];
+S={b:rows.map(function(r){return r?r.split(""):["","","","","","","",""]}),cr:{K:1,Q:1,k:1,q:1},ep:null,turn:"w"};
+last=null;hist=[];moves=[];sel=null;over="";caps=[[],[]];ml=[];busy=false;clockLeft={w:600,b:600};clockStarted=false;lastClockTick=Date.now();rebuild();upd()}
+function glyphs(a){return a.slice().sort(function(x,y){return VAL[y.toLowerCase()]-VAL[x.toLowerCase()]}).map(function(p){return '<span class="'+(col(p)==="w"?"w":"k")+'">'+GL[p.toLowerCase()]+V+"</span>"}).join("")}
+function upd(){
+var ck=inCheck(S.b,S.turn),kr=-1,kc=-1;
+if(ck)for(var r=0;r<8;r++)for(var c=0;c<8;c++)if(S.b[r][c]===(S.turn==="w"?"K":"k")){kr=r;kc=c}
+for(var y=0;y<8;y++)for(var x=0;x<8;x++){var k="s "+((y+x)%2?"d":"l");
+if(last&&((last[0][0]===y&&last[0][1]===x)||(last[1][0]===y&&last[1][1]===x)))k+=" lm";
+if(sel&&sel[0]===y&&sel[1]===x)k+=" sl";if(y===kr&&x===kc)k+=" ck";
+for(var i=0;i<moves.length;i++)if(moves[i][0]===y&&moves[i][1]===x)k+=" mv"+(S.b[y][x]||moves[i][2]==="e"?" cp":"");
+sqE[y][x].className=k}
+var top=fl?"w":"b",bot=fl?"b":"w",nm={w:ai?"You":"White",b:ai?"Computer":"Black"};
+function row(id,side){var got=side==="w"?caps[1]:caps[0];document.getElementById(id).innerHTML='<i class="av">'+(side==="w"?"♔":"♚")+V+"</i><b>"+nm[side]+'</b><span class="cap">'+glyphs(got)+"</span>"+'<span class="clock" id="clock-'+id+'">10:00</span>'}
+row("pt",top);row("pb",bot);
+document.getElementById("fr").className="frame"+(over?" end":"");
+document.getElementById("dot").className="dot "+(S.turn==="w"?"w":"k");
+document.getElementById("st").textContent=over||(busy?"Computer is thinking…":(S.turn==="w"?"White":"Black")+" to move"+(ck?" · Check":""));
+var h="";for(var j=0;j<ml.length;j++){h+=(j%2?"":"<b>"+(j/2+1)+".</b> ")+ml[j]+" "}
+var m=document.getElementById("ml");m.innerHTML=h||"Your move list will appear here.";m.scrollTop=m.scrollHeight;drawClocks()}
+function san(s,fr,fc,m,n){var p=s.b[fr][fc],t=p.toLowerCase(),f=m[2],tr=m[0],tc=m[1],str;
+if(f==="k")str="O-O";else if(f==="q")str="O-O-O";else{var d="abcdefgh"[tc]+(8-tr);
+str=t==="p"?(n.cap?"abcdefgh"[fc]+"x":"")+d:t.toUpperCase()+(n.cap?"x":"")+d;if(n.b[tr][tc]!==p)str+="=Q"}
+if(inCheck(n.b,n.turn))str+=all(n).length?"+":"#";return str}
+function doMove(fr,fc,m){
+var s0=S,p=s0.b[fr][fc],n=mk(s0,fr,fc,m),tr=m[0],tc=m[1],f=m[2],cp=n.cap;
+hist.push({s:s0,l:last,c:[caps[0].slice(),caps[1].slice()],n:ml.length,clock:{w:clockLeft.w,b:clockLeft.b},started:clockStarted});
+if(cp){var cr=f==="e"?fr:tr,ce=el[cr][tc];if(ce){ce.style.opacity=0;ce.style.transform+=" scale(.4)";setTimeout(function(){ce.remove()},280)}el[cr][tc]=null;caps[col(cp)==="w"?0:1].push(cp)}
+var e=el[fr][fc];el[fr][fc]=null;el[tr][tc]=e;e.style.zIndex=++z;place(e,tr,tc);
+if(f==="k"){el[tr][5]=el[tr][7];el[tr][7]=null;place(el[tr][5],tr,5)}
+if(f==="q"){el[tr][3]=el[tr][0];el[tr][0]=null;place(el[tr][3],tr,3)}
+if(n.b[tr][tc]!==p)e.textContent=GL.q+V;
+ml.push(san(s0,fr,fc,m,n));
+var ck=inCheck(n.b,n.turn),cnt=all(n).length;
+S=n;last=[[fr,fc],[tr,tc]];sel=null;moves=[];clockStarted=true;lastClockTick=Date.now();
+if(!cnt)over=ck?(n.turn==="w"?"Checkmate · Black wins":"Checkmate · White wins"):"Stalemate · Draw";
+if(over)clockStarted=false;snd(cp?150:210);upd();aiMove()}
+function aiMove(){if(!ai||over||S.turn!=="b")return;busy=true;upd();
+setTimeout(function(){var best=null,bv=1e9;all(S).forEach(function(x){var v=search(mk(S,x.r,x.c,x.m),2,-1e9,1e9)+Math.random()*8;if(v<bv){bv=v;best=x}});busy=false;if(best)doMove(best.r,best.c,best.m)},380)}
+function tap(r,c){if(over||busy||(ai&&S.turn==="b"))return;
+var m=null;moves.forEach(function(x){if(x[0]===r&&x[1]===c)m=x});
+if(sel&&m){doMove(sel[0],sel[1],m);return}
+var p=S.b[r][c];
+if(p&&col(p)===S.turn&&!(sel&&sel[0]===r&&sel[1]===c)){sel=[r,c];moves=lg(S,r,c);snd(320)}else{sel=null;moves=[]}
+upd()}
+function undo(){if(busy||!hist.length)return;var k=ai&&S.turn==="w"?2:1,h;while(k--&&hist.length)h=hist.pop();
+S=h.s;last=h.l;caps=h.c;ml.length=h.n;clockLeft=h.clock||{w:600,b:600};clockStarted=!!h.started;lastClockTick=Date.now();over="";sel=null;moves=[];rebuild();upd()}
+function mode(a){ai=a;document.getElementById("m1").className="btn"+(a?" on":"");document.getElementById("m2").className="btn"+(a?"":" on");init()}
+document.getElementById("sq").onclick=function(e){var t=e.target.closest("[data-r]");if(t)tap(+t.dataset.r,+t.dataset.c)};
+document.getElementById("nw").onclick=init;
+document.getElementById("un").onclick=undo;
+document.getElementById("fp").onclick=function(){fl=!fl;rebuild();upd()};
+document.getElementById("sn").onclick=function(){snOn=!snOn;this.className="btn"+(snOn?" on":"")};
+document.getElementById("m1").onclick=function(){mode(true)};
+document.getElementById("m2").onclick=function(){mode(false)};
+
+function fmtTime(n){n=Math.max(0,Math.ceil(n));return Math.floor(n/60)+":"+String(n%60).padStart(2,"0")}
+function drawClocks(){var a=document.getElementById("clock-pt"),b=document.getElementById("clock-pb");if(!a||!b)return;var top=fl?"w":"b",bot=fl?"b":"w";a.textContent=fmtTime(clockLeft[top]);b.textContent=fmtTime(clockLeft[bot]);a.classList.toggle("active",clockOn&&clockStarted&&!over&&S.turn===top);b.classList.toggle("active",clockOn&&clockStarted&&!over&&S.turn===bot);a.style.display=b.style.display=clockOn?"block":"none";document.getElementById("clockToggle").textContent="10-minute clock: "+(clockOn?"On":"Off")}
+function clockTick(){var now=Date.now(),elapsed=(now-lastClockTick)/1000;lastClockTick=now;if(clockOn&&clockStarted&&!over&&S){clockLeft[S.turn]-=elapsed;if(clockLeft[S.turn]<=0){clockLeft[S.turn]=0;over="Time out · "+(S.turn==="w"?"Black":"White")+" wins";clockStarted=false;upd()}else drawClocks()}}
+setInterval(clockTick,250);
+document.getElementById("clockToggle").onclick=function(){clockOn=!clockOn;drawClocks()};
+document.getElementById("exportPgn").onclick=function(){var body="[Event \"Knight Moves Game\"]\n[Site \"amirhamzaanis.github.io\"]\n[Result \"*\"]\n\n";for(var i=0;i<ml.length;i++){if(i%2===0)body+=(Math.floor(i/2)+1)+". ";body+=ml[i]+" ";}body+="*\n";var blob=new Blob([body],{type:"application/x-chess-pgn;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download="knight-moves-game.pgn";document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url)},1000)};
+(function(){var saved=document.documentElement.getAttribute("data-theme");try{saved=localStorage.getItem("knight-moves-theme")||saved}catch(e){}if(saved)document.documentElement.setAttribute("data-theme",saved);function label(){var light=document.documentElement.getAttribute("data-theme")==="light";document.getElementById("themeToggle").textContent=light?"☾ Dark mode":"☼ Light mode"}document.getElementById("themeToggle").onclick=function(){var light=document.documentElement.getAttribute("data-theme")==="light";var next=light?"dark":"light";document.documentElement.setAttribute("data-theme",next);try{localStorage.setItem("knight-moves-theme",next)}catch(e){}label()};label()})();
+document.getElementById("shareSite").onclick=async function(){try{if(navigator.share){await navigator.share({title:"Knight Moves — Play Chess",text:"Play chess and practise with Knight Moves",url:location.href.split("#")[0]})}else if(navigator.clipboard){await navigator.clipboard.writeText(location.href.split("#")[0]);this.textContent="Link copied!"}else{prompt("Copy your website link:",location.href.split("#")[0])}}catch(e){}};
+var VIEWS=["home","play","quiz","coach","help"];
+function route(){var h=location.hash.slice(1);if(VIEWS.indexOf(h)<0)h="home";
+VIEWS.forEach(function(v){document.getElementById("v-"+v).hidden=v!==h});
+Array.prototype.forEach.call(document.querySelectorAll("#nav a"),function(a){a.className=a.getAttribute("href")==="#"+h?"on":""});window.scrollTo(0,0)}
+window.addEventListener("hashchange",route);
+var QZ=[["Which piece moves only diagonally?",["Rook","Bishop","Knight"],1,"The bishop stays on one colour of square all game."],["Roughly how many pawns is a queen worth?",["5","9","12"],1,"A queen is usually valued at about nine pawns."],["Which piece can jump over others?",["Knight","Bishop","Queen"],0,"Only the knight can leap over pieces."],["What is it called when the player to move has no legal move and is not in check?",["Checkmate","Stalemate","Zugzwang"],1,"Stalemate is a draw."],["Which special move involves the king and a rook?",["En passant","Promotion","Castling"],2,"Castling tucks the king away and activates the rook."],["A pawn reaching the far rank can become…",["Only a queen","Queen, rook, bishop or knight","Nothing"],1,"Promotion offers four choices, though the queen is the usual pick."]],qs={i:0,s:0};
+function renderQ(){var b=document.getElementById("qz");b.innerHTML="";
+if(qs.i>=QZ.length){b.innerHTML='<p class="big">'+qs.s+" / "+QZ.length+'</p><p class="qq">'+(qs.s>=5?"Grandmaster in the making":qs.s>=3?"Solid club player":"Keep practising – you’ll get there")+"</p>";var r=document.createElement("button");r.className="btn p";r.textContent="Try again";r.onclick=function(){qs={i:0,s:0};renderQ()};b.appendChild(r);return}
+var q=QZ[qs.i],t=document.createElement("p");t.className="mut";t.textContent="Question "+(qs.i+1)+" of "+QZ.length;b.appendChild(t);
+t=document.createElement("p");t.className="qq";t.textContent=q[0];b.appendChild(t);
+q[1].forEach(function(o,k){var x=document.createElement("button");x.className="btn opt";x.textContent=o;x.onclick=function(){answer(k)};b.appendChild(x)})}
+function answer(k){var q=QZ[qs.i],b=document.getElementById("qz"),o=b.querySelectorAll(".opt");
+for(var j=0;j<o.length;j++){o[j].disabled=true;if(j===q[2])o[j].classList.add("ok");else if(j===k)o[j].classList.add("no")}
+if(k===q[2])qs.s++;
+var p=document.createElement("p");p.className="mut";p.textContent=q[3];b.appendChild(p);
+var n=document.createElement("button");n.className="btn p";n.textContent=qs.i<QZ.length-1?"Next":"See result";n.onclick=function(){qs.i++;renderQ()};b.appendChild(n)}
+var SYS="You are a friendly chess coach inside a chess website. Reply in plain text, under 90 words, beginner friendly. If the question is not about chess, politely steer back to chess.",cv=[];
+function localCoach(q){var t=q.toLowerCase();if(/open|opening|begin/.test(t))return "Start by controlling the centre with a pawn, develop knights and bishops, and castle early. Avoid moving the same piece repeatedly in the opening unless there is a clear reason.";if(/castle|castling|king safety/.test(t))return "Castling moves your king two squares toward a rook, then the rook jumps beside it. You cannot castle through check, out of check, or if the king or that rook has already moved.";if(/blunder|mistake|hang|lose pieces/.test(t))return "Before each move, use a quick blunder-check: what is my opponent attacking, is my piece defended, and can they give check or capture my queen? Look at forcing moves first: checks, captures, and threats.";if(/knight/.test(t))return "A knight moves in an L shape: two squares in one direction and one square sideways. It is the only piece that can jump over other pieces.";if(/bishop/.test(t))return "A bishop moves diagonally any number of empty squares. Each bishop stays on the same colour squares for the whole game.";if(/queen|value|points/.test(t))return "A common piece-value guide is pawn 1, knight 3, bishop 3, rook 5, queen 9. These are rough guides—king safety and tactics matter more than the numbers alone.";if(/checkmate|stalemate|draw/.test(t))return "Checkmate means the king is in check and has no legal escape. Stalemate means the player has no legal move but is not in check; that is a draw.";if(/tactic|fork|pin|skewer/.test(t))return "Practise looking for checks, captures, and threats in that order. A fork attacks two targets at once; a pin makes moving a piece dangerous because a more valuable piece behind it could be exposed.";return "Try this improvement habit: after every opponent move, ask what changed and what they are threatening. Then check your candidate move for checks, captures, and threats. Ask me about openings, castling, tactics, piece values, or checkmate for a focused tip."}
+function say(c,t){var d=document.createElement("div");d.className="msg "+c;d.textContent=t;var l=document.getElementById("chat");l.appendChild(d);l.scrollTop=l.scrollHeight;return d}
+async function ask(q){q=(q||"").trim();if(!q)return;document.getElementById("ci").value="";say("me",q);var m=say("ai","Thinking…"),sm=null;
+try{sm=window.claude?await claude.use("sample"):null}catch(e){}
+if(!sm){m.textContent=localCoach(q);cv.push("Student: "+q,"Coach: "+m.textContent);cv=cv.slice(-8);return}
+try{var r=await sm(SYS+"\n\nConversation so far:\n"+cv.join("\n")+"\nStudent: "+q+"\nCoach:",{cache:false,modelTier:"quick",onText:function(e){m.textContent=e.text;document.getElementById("chat").scrollTop=1e6}});
+m.textContent=r.text;cv.push("Student: "+q,"Coach: "+r.text);cv=cv.slice(-8)}catch(e){m.textContent="Sorry, I couldn’t reach the coach. Please try again in a moment."}}
+document.getElementById("cs").onclick=function(){ask(document.getElementById("ci").value)};
+document.getElementById("ci").onkeydown=function(e){if(e.key==="Enter")ask(this.value)};
+Array.prototype.forEach.call(document.querySelectorAll("[data-q]"),function(b){b.onclick=function(){ask(b.dataset.q)}});
+say("ai","Hi! I’m your chess coach. Ask me about openings, tactics or the rules.");
+renderQ();route();init();
+</script>
+</body>
+</html>
